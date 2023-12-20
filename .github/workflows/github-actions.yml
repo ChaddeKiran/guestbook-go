@@ -21,8 +21,19 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build Docker Image
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} .
 
+      - name: Build Docker Image
+        run: |
+          docker build -t guestbook-go:${{ github.run_id }} .
+          docker tag guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
+          docker tag guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
+          
       - name: Push Docker Image
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
+
+      - name: Removeing Docker Images from local machine
+        run: |
+          docker rmi -f ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
+          docker rmi -f ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
