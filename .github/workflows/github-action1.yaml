@@ -1,12 +1,12 @@
-name: Build and Push Docker Image
+name: Build Container Image
 
 on:
   push:
     branches:
-      - master # Change this to your main branch name or desired branch
+      - main 
 
 jobs:
-  build-and-push:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,9 +22,20 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build Docker Image
+      - name: Check for PR merged into main
+        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged && github.event.pull_request.base.ref == 'main'
         run: |
+          echo "PR merged into main! Triggering image build."
           docker build -t guestbook-go:${{ github.run_id }} .
+
+      - name: Check commit message for specific string
+        if: contains(github.event.head_commit.message, 'BUILD_CONTAINER_IMAGE')
+        run: |
+          echo "Commit message contains 'BUILD_CONTAINER_IMAGE'. Triggering image build."
+          docker build -t guestbook-go:${{ github.run_id }} .
+
+      - name: Tagging Docker Image
+        run: |
           docker tag guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
           docker tag guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
           
@@ -33,7 +44,11 @@ jobs:
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
 
-      - name: Removeing Docker Images from local machine
+      - name: Remove Docker Images from local machine
+        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged && github.event.pull_request.base.ref == 'main' ||
+            contains(github.event.head_commit.message, 'BUILD_CONTAINER_IMAGE')
         run: |
           docker rmi -f ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
           docker rmi -f ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
+
+
