@@ -22,21 +22,31 @@ import (
 	"os"
 	"strings"
 
-	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
+	"github.com/urfave/negroni"
 	"github.com/xyproto/simpleredis/v2"
 )
 
 var (
-	masterPool *simpleredis.ConnectionPool
-	replicaPool  *simpleredis.ConnectionPool
+	masterPool  *simpleredis.ConnectionPool
+	replicaPool *simpleredis.ConnectionPool
 )
 
 func ListRangeHandler(rw http.ResponseWriter, req *http.Request) {
 	key := mux.Vars(req)["key"]
 	list := simpleredis.NewList(replicaPool, key)
-	members := HandleError(list.GetAll()).([]string)
-	membersJSON := HandleError(json.MarshalIndent(members, "", "  ")).([]byte)
+	members, err := list.GetAll()
+	if err != nil {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	membersJSON, err := json.MarshalIndent(members, "", "  ")
+	if err != nil {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	rw.Write(membersJSON)
 }
 
@@ -44,33 +54,48 @@ func ListPushHandler(rw http.ResponseWriter, req *http.Request) {
 	key := mux.Vars(req)["key"]
 	value := mux.Vars(req)["value"]
 	list := simpleredis.NewList(masterPool, key)
-	HandleError(nil, list.Add(value))
+	if err := list.Add(value); err != nil {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	ListRangeHandler(rw, req)
 }
 
 func InfoHandler(rw http.ResponseWriter, req *http.Request) {
-	info := HandleError(masterPool.Get(0).Do("INFO")).([]byte)
-	rw.Write(info)
+	info, err := masterPool.Get(0).Do("INFO")
+	if err != nil {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	infoBytes, ok := info.([]byte)
+	if !ok {
+		http.Error(rw, "Unexpected response from Redis", http.StatusInternalServerError)
+		return
+	}
+
+	rw.Write(infoBytes)
 }
 
 func EnvHandler(rw http.ResponseWriter, req *http.Request) {
 	environment := make(map[string]string)
 	for _, item := range os.Environ() {
-		splits := strings.Split(item, "=")
-		key := splits[0]
-		val := strings.Join(splits[1:], "=")
-		environment[key] = val
+		splits := strings.SplitN(item, "=", 2)
+		if len(splits) == 2 {
+			key := splits[0]
+			val := splits[1]
+			environment[key] = val
+		}
 	}
 
-	envJSON := HandleError(json.MarshalIndent(environment, "", "  ")).([]byte)
-	rw.Write(envJSON)
-}
-
-func HandleError(result interface{}, err error) (r interface{}) {
+	envJSON, err := json.MarshalIndent(environment, "", "  ")
 	if err != nil {
-		panic(err)
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
 	}
-	return result
+
+	rw.Write(envJSON)
 }
 
 func main() {
@@ -88,4 +113,5 @@ func main() {
 	n := negroni.Classic()
 	n.UseHandler(r)
 	n.Run(":3000")
+	//n.Run(":4000")
 }

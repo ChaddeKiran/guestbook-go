@@ -12,20 +12,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM golang:1.10.0
-RUN go get github.com/codegangsta/negroni \
-           github.com/xyproto/simpleredis/v2 \ 
-           github.com/gorilla/mux
-           
+# Stage 1: Build the Go application
+FROM golang:1.10.0 AS builder
+
+# Fetch dependencies
+RUN go get github.com/urfave/negroni \
+    && go get github.com/xyproto/simpleredis/v2 \
+    && go get github.com/gorilla/mux
+
 WORKDIR /app
-ADD ./main.go .
+
+# Copy the source code into the container
+COPY main.go .
+
+# Build the Go application
 RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 
+# Stage 2: Create a minimal container to run the application
 FROM scratch
+
 WORKDIR /app
-COPY --from=0 /app/main .
+
+# Copy the built executable from the previous stage
+COPY --from=builder /app/main .
+
+# Assuming you have static files in a 'public' directory
 COPY ./public/index.html public/index.html
 COPY ./public/script.js public/script.js
 COPY ./public/style.css public/style.css
-CMD ["/app/main"]
+
+# Expose the port your application listens on
 EXPOSE 3000
+
+# Command to run the application
+CMD ["./main"]
