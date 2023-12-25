@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main 
+  pull_request:
+    types: [closed]
 
 jobs:
   build:
@@ -26,28 +28,16 @@ jobs:
         if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged && github.event.pull_request.base.ref == 'main'
         run: |
           echo "PR merged into main! Triggering image build."
-          docker buildx build -t guestbook-go:${{ github.run_id }} .
-          docker tag guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
-          docker tag guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} .
+          docker tag ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
 
       - name: Check commit message for specific string
         if: contains(github.event.head_commit.message, 'BUILD_CONTAINER_IMAGE')
         run: |
           echo "Commit message contains 'BUILD_CONTAINER_IMAGE'. Triggering image build."
-          docker buildx build -t guestbook-go:${{ github.run_id }} .
-          docker tag guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
-          docker tag guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
-
-      - name: Push Docker Image
-        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} .
+          docker tag ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
-
-      - name: Remove Docker Images from local machine
-        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged && github.event.pull_request.base.ref == 'main' ||
-            contains(github.event.head_commit.message, 'BUILD_CONTAINER_IMAGE')
-        run: |
-          docker rmi -f ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
-          docker rmi -f ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
-
-
