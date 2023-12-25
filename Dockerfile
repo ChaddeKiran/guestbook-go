@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+#  
 # Stage 1: Build the Go application
 FROM golang:1.10.0 AS builder
 
