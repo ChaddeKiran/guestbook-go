@@ -43,18 +43,16 @@ jobs:
       #     echo "Commit message contains 'BUILD_CONTAINER_IMAGE'. Triggering image build."
       #     docker build --no-cache -t ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} .
       #     docker tag ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
-      #       # docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
-      #       # docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
-      #     #else:
-      #       echo "PR merged into main! Triggering image build."
-      #       docker build --no-cache -t ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} .
-      #       docker tag ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
-      #       # docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
-      #       # docker tag ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
-      #       # docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
+      #     docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
+      #     docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
+      #  
+      
+# Optimised code github_actions does not provides direct use the syntex if-else 
+# $(git log -1 --pretty=%B) it featches the last commit author,data,commit id, commit message
+# from that --pretty=%B it brings only body of the commit i.e commit message  
       - name: Check commit message for specific string
         run: |
-          if [[ $(git log -1 --pretty=%B) == *"BUILD_CONTAINER_IMAGE"* ]]; then
+          if [[ $(git log -1 --pretty=%B) == *"BUILD_CONTAINER_IMAGE"* ]]; then  
             echo "Commit message contains 'BUILD_CONTAINER_IMAGE'. Triggering image build."
             docker build --no-cache -t ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} .
             docker tag ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
