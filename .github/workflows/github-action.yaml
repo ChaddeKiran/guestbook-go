@@ -26,7 +26,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-# to get a optimized performance   
       # - name: Check for PR merged into main
       #   if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged && github.event.pull_request.base.ref == 'main'
       #   run: |
