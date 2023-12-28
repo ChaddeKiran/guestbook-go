@@ -6,8 +6,6 @@ on:
   push:
     branches:
       - main 
-  pull_request:
-    types: [closed]
 
 jobs:
   build:
@@ -26,44 +24,39 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-# to get a optimized performance   
-      # - name: Check for PR merged into main
-      #   if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged && github.event.pull_request.base.ref == 'main'
-      #   run: |
-      #     echo "PR merged into main! Triggering image build."
-      #     docker build --no-cache -t ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} .
-      #     docker tag ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
-      #     docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
-      #     docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
+      - name: Check for PR merged into main
+        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged && github.event.pull_request.base.ref == 'main'
+        run: |
+          echo "PR merged into main! Triggering image build."
+          docker build --no-cache -t ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} .
+          docker tag ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
 
-      # - name: Check commit message for specific string
-      #   if: contains(github.event.head_commit.message, 'BUILD_CONTAINER_IMAGE')
-      #   run: |
-      #     #if: contains(github.event.head_commit.message, 'BUILD_CONTAINER_IMAGE')
-      #     echo "Commit message contains 'BUILD_CONTAINER_IMAGE'. Triggering image build."
-      #     docker build --no-cache -t ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} .
-      #     docker tag ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
-      #     docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
-      #     docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
-      #  
-      
-# Optimised code github_actions does not provides direct use the syntex if-else 
-# $(git log -1 --pretty=%B) it featches the last commit author,data,commit id, commit message
-# from that --pretty=%B it brings only body of the commit i.e commit message  
       - name: Check commit message for specific string
+        if: contains(github.event.head_commit.message, 'BUILD_CONTAINER_IMAGE')
         run: |
-          if [[ $(git log -1 --pretty=%B) == *"BUILD_CONTAINER_IMAGE"* ]]; then  
-            echo "Commit message contains 'BUILD_CONTAINER_IMAGE'. Triggering image build."
-            docker build --no-cache -t ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} .
-            docker tag ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
-          else
-            echo "No specific commit message found. Triggering default image build."
-            docker build --no-cache -t ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} .
-            docker tag ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
-          fi
-      - name: Pushing the Docker image to DockerHub
-        run: |
-            docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
-            docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
-            echo "docker images are successfully pushed to DockerHub"
+          #if: contains(github.event.head_commit.message, 'BUILD_CONTAINER_IMAGE')
+          echo "Commit message contains 'BUILD_CONTAINER_IMAGE'. Triggering image build."
+          docker build --no-cache -t ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} .
+          docker tag ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
+      
+      # - name: Check commit message for specific string
+      #   run: |
+      #     if [[ $(git log -1 --pretty=%B) == *"BUILD_CONTAINER_IMAGE"* ]]; then
+      #       echo "Commit message contains 'BUILD_CONTAINER_IMAGE'. Triggering image build."
+      #       docker build --no-cache -t ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} .
+      #       docker tag ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
+      #     else
+      #       echo "No specific commit message found. Triggering default image build."
+      #       docker build --no-cache -t ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} .
+      #       docker tag ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
+      #     fi
+      # - name: Pushing the Docker image to DockerHub
+      #   run: |
+      #       docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
+      #       docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
+      #       echo "docker images are successfully pushed to DockerHub" 
             
