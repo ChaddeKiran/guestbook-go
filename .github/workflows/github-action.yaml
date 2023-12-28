@@ -32,8 +32,8 @@ jobs:
           echo "PR merged into main! Triggering image build."
           docker build --no-cache -t ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} .
           docker tag ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
-      #     docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
-      #     docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
 
       - name: Check commit message for specific string
         if: contains(github.event.head_commit.message, 'BUILD_CONTAINER_IMAGE')
@@ -42,8 +42,8 @@ jobs:
           echo "Commit message contains 'BUILD_CONTAINER_IMAGE'. Triggering image build."
           docker build --no-cache -t ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} .
           docker tag ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
-      #       # docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
-      #       # docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
       #     #else:
       #       echo "PR merged into main! Triggering image build."
       #       docker build --no-cache -t ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} .
@@ -62,9 +62,9 @@ jobs:
       #       docker build --no-cache -t ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} .
       #       docker tag ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
       #     fi
-      - name: Pushing the Docker image to DockerHub
-        run: |
-            docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
-            docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
-            echo "docker images are successfully pushed to DockerHub"
+      # - name: Pushing the Docker image to DockerHub
+      #   run: |
+      #       docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
+      #       docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
+      #       echo "docker images are successfully pushed to DockerHub"
             
