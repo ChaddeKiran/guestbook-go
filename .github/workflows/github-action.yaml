@@ -5,7 +5,7 @@ name: Build Container Image
 on:
   push:
     branches:
-      - main 
+      - main  
 
 jobs:
   build:
