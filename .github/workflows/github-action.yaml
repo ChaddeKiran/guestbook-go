@@ -6,8 +6,6 @@ on:
   push:
     branches:
       - main 
-  # pull_request:
-  #   types: [closed]
 
 jobs:
   build:
@@ -44,13 +42,7 @@ jobs:
           docker tag ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
-      #     #else:
-      #       echo "PR merged into main! Triggering image build."
-      #       docker build --no-cache -t ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} .
-      #       docker tag ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
-      #       # docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
-      #       # docker tag ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
-      #       # docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
+      
       # - name: Check commit message for specific string
       #   run: |
       #     if [[ $(git log -1 --pretty=%B) == *"BUILD_CONTAINER_IMAGE"* ]]; then
@@ -66,5 +58,5 @@ jobs:
       #   run: |
       #       docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
       #       docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
-      #       echo "docker images are successfully pushed to DockerHub"
+      #       echo "docker images are successfully pushed to DockerHub" 
             
