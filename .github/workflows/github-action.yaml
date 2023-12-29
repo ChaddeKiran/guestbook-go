@@ -24,26 +24,26 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Check for PR merged into main or commit message
-        run: |
-          if [[ ${{ github.event_name }} == 'pull_request' && ${{ github.event.action }} == 'closed' && ${{ github.event.pull_request.merged }} && ${{ github.event.pull_request.base.ref }} == 'main' ]] || [[ $(git log -1 --pretty=%B) == *"BUILD_CONTAINER_IMAGE"* ]]; then
-            echo "Triggering image build."
-            docker build --no-cache -t ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} .
-            docker tag ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
-            docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
-            docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
-          else
-            echo "No specific condition met. Not triggering image build."
-          fi
-      
-      # - name: Check for PR merged into main
-      #   if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged && github.event.pull_request.base.ref == 'main'
+      # - name: Check for PR merged into main or commit message
       #   run: |
-      #     echo "PR merged into main! Triggering image build."
-      #     docker build --no-cache -t ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} .
-      #     docker tag ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
-      #     docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
-      #     docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
+      #     if [[ ${{ github.event_name }} == 'pull_request' && ${{ github.event.action }} == 'closed' && ${{ github.event.pull_request.merged }} && ${{ github.event.pull_request.base.ref }} == 'main' ]] || [[ $(git log -1 --pretty=%B) == *"BUILD_CONTAINER_IMAGE"* ]]; then
+      #       echo "Triggering image build."
+      #       docker build --no-cache -t ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} .
+      #       docker tag ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
+      #       docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
+      #       docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
+      #     else
+      #       echo "No specific condition met. Not triggering image build."
+      #     fi
+      
+      - name: Check for PR merged into main
+        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged && github.event.pull_request.base.ref == 'main' || contains(github.event.head_commit.message, 'BUILD_CONTAINER_IMAGE')
+        run: |
+          echo "PR merged into main! Triggering image build."
+          docker build --no-cache -t ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} .
+          docker tag ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:latest
 
       # - name: Check commit message for specific string
       #   if: contains(github.event.head_commit.message, 'BUILD_CONTAINER_IMAGE')
