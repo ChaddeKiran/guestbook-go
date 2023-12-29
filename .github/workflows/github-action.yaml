@@ -37,7 +37,7 @@ jobs:
       #     fi
       
       - name: Check for PR merged into main
-        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged && github.event.pull_request.base.ref == 'main' || contains(github.event.head_commit.message, 'BUILD_CONTAINER_IMAGE')
+        if: (github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged && github.event.pull_request.base.ref == 'main') || (contains(github.event.head_commit.message, 'BUILD_CONTAINER_IMAGE'))
         run: |
           echo "PR merged into main! Triggering image build."
           docker build --no-cache -t ${{ secrets.DOCKERHUB_USERNAME }}/guestbook-go:${{ github.run_id }} .
