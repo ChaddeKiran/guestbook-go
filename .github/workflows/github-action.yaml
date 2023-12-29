@@ -1,5 +1,5 @@
 #task 1 : PR is merged into main folder from another branch completed 
-#task 2 : commmit message "BUILD_CONTAINER_IMAGE" completed
+#task 2 : commmit message "BUILD_CONTAINER_IMAGE" completed 
 name: Build Container Image  
 
 on:
